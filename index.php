@@ -9,7 +9,6 @@
 require 'vendor/autoload.php';
 
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\CssSelector\CssSelectorConverter;
 
 $today = new \DateTime();
 
@@ -17,7 +16,7 @@ $loginArray = [
     'app_login_type[username]' => 'admin',
     'app_login_type[password]' => '1234',
 ];
-$url = 'https://erp.411reports.com/security/login';
+$url = 'https://test.com/security/login';
 $client = new \GuzzleHttp\Client(['cookies' => true]);
 $response = $client->request('POST', $url, [
     'form_params' =>$loginArray
@@ -28,7 +27,7 @@ $html = ''.$response->getBody();
 if($response->getStatusCode() == 200){
     echo "Logged in!!!";
 
-    $response = $client->request('GET', 'https://erp.411reports.com/level');
+    $response = $client->request('GET', 'https://test.com/level');
     $html = ''.$response->getBody();
 
     echo $html;
