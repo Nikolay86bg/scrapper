@@ -6,6 +6,7 @@
 
 //http://docs.guzzlephp.org/en/stable/
 //https://symfony.com/doc/current/components/dom_crawler.html
+//composer require symfony/css-selector
 require 'vendor/autoload.php';
 
 use Symfony\Component\DomCrawler\Crawler;
@@ -13,10 +14,10 @@ use Symfony\Component\DomCrawler\Crawler;
 $today = new \DateTime();
 
 $loginArray = [
-    'app_login_type[username]' => 'admin',
-    'app_login_type[password]' => '1234',
+    'email' => 'petarivanov2012@gmail.com',
+    'password' => '123456789',
 ];
-$url = 'https://test.com/security/login';
+$url = 'https://skyphone.bg/login';
 $client = new \GuzzleHttp\Client(['cookies' => true]);
 $response = $client->request('POST', $url, [
     'form_params' =>$loginArray
@@ -27,10 +28,32 @@ $html = ''.$response->getBody();
 if($response->getStatusCode() == 200){
     echo "Logged in!!!";
 
-    $response = $client->request('GET', 'https://test.com/level');
-    $html = ''.$response->getBody();
+//    $response = $client->request('GET', 'https://test.com/level');
+//    $html = ''.$response->getBody();
+//    echo $html;
 
-    echo $html;
+    $crawler = new Crawler($html);
+    $nodeValues = $crawler->filter('.sub-menu > li')->each(function (Crawler $node, $i) {
+        $categoryUrl = $node->filter('a')->attr('href');
+        if (strpos($categoryUrl, '#') !== false) {
+
+        }else{
+            return $categoryUrl;
+        }
+    });
+echo '<pre>';
+    print_R($nodeValues);
+//    $file = fopen('links'.$today->format('Ymd').'.csv', 'w');
+//
+//    foreach($nodeValues as $node){
+//        fputcsv($file,$node);
+//    }
+//
+//    fclose($file);
+//
+//    echo 'CSV created!';
+
+
 
 }else{
     echo 'Status Code: '.$response->getStatusCode();
@@ -38,18 +61,4 @@ if($response->getStatusCode() == 200){
 
 exit;
 //loop through the data
-//$crawler = new Crawler($html);
-//$nodeValues = $crawler->filter('.navbar-nav > li')->each(function (Crawler $node, $i) {
-//    $url = $node->filter('a')->attr('href');
-//    return [$url,$node->text()];
-//});
-//
-//$file = fopen('links'.$today->format('Ymd').'.csv', 'w');
-//
-//foreach($nodeValues as $node){
-//    fputcsv($file,$node);
-//}
-//
-//fclose($file);
-//
-//echo 'CSV created!';
+
