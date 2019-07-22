@@ -9,6 +9,8 @@ require 'vendor/autoload.php';
 
 use Symfony\Component\DomCrawler\Crawler;
 
+set_time_limit(0);
+
 function getMenuCategoriesUrl($html)
 {
     $crawler = new Crawler($html);
@@ -22,6 +24,35 @@ function getMenuCategoriesUrl($html)
     });
 }
 
+function generatePrice($categories, $oldPrice)
+{
+    switch ($categories) {
+        case in_array('9H Tempered Glass', $categories):
+            return round((float) $oldPrice * 7, 1);
+        case in_array('3D, 5D & 9D', $categories):
+            return round((float) $oldPrice * 1.1, 1);
+        case in_array('Nаno Glass', $categories):
+            return round((float) $oldPrice * 3, 1);
+        case in_array('UV Glass', $categories):
+            return round((float) $oldPrice * 4, 1);
+        case in_array('PREMIUM BRANDS', $categories):
+            return round((float) $oldPrice * 1.1, 1);
+        case in_array('Зарядни', $categories):
+            return round((float) $oldPrice * 1.1, 1);
+        case in_array('Κабели', $categories):
+            return round((float) $oldPrice * 3.5, 1);
+        case in_array('Basic Slim', $categories):
+            return round((float) $oldPrice * 7, 1);
+        case in_array('Гърбове', $categories):
+            return round((float) $oldPrice * 3, 1);
+        case in_array('Тефтери', $categories):
+            return round((float) $oldPrice * 2.5, 1);
+        case in_array('Калъфи 360°', $categories):
+            return round((float) $oldPrice * 3, 1);
+        default:
+            return round((float) $oldPrice * 2, 1);
+    }
+}
 
 $today = new \DateTime();
 
@@ -65,19 +96,20 @@ if ($response->getStatusCode() == 200) {
         }
 
 //        if ($key == 1) {
+//            $productUrls = (array_slice($productUrls, -1, 1));
 //            break;
 //        }
     }
 
-    print_R($productUrls);
-    exit;
+//    print_R($productUrls);
+//    exit;
 
 
     $file = fopen('scraped'.$today->format('Ymd').'.csv', 'w');
 
     // go get product data from url
     foreach ($productUrls as $url => $someValue) {
-        $urlArray = explode('/',$url);
+        $urlArray = explode('/', $url);
         $response = $client->request('GET', $domain . $url);
         $crawler = new Crawler('' . $response->getBody());
 
@@ -87,11 +119,11 @@ if ($response->getStatusCode() == 200) {
         $description = trim($crawler->filter('.product-description')->text());
         $image = $crawler->filter('.product-full-image')->attr('src');
 
-        if($crawler->filter('.sold')->count() == 1){
+        if ($crawler->filter('.sold')->count() == 1) {
             $inStock = $crawler->filter('.sold')->text();
-        }elseif($crawler->filter('.sold-out')->count() == 1){
+        } elseif ($crawler->filter('.sold-out')->count() == 1) {
             $inStock = $crawler->filter('.sold-out')->text();
-        }else{
+        } else {
             $inStock = "";
         }
 
@@ -99,7 +131,10 @@ if ($response->getStatusCode() == 200) {
             return trim($node->filter('a')->text());
         });
 
-        fputcsv($file,[$id,$name,$price,$description,$image,$inStock,implode(' | ',$categories)]);
+        // generate new price
+        $newPrice = generatePrice($categories, $price);
+
+        fputcsv($file,[$id,$name,$newPrice,$description,$image,$inStock,implode(' | ',$categories)]);
     }
 
     fclose($file);
