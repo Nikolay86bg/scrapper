@@ -83,7 +83,8 @@ if ($response->getStatusCode() == 200) {
 
                 $urls = $crawler->filter('.row-stripedd')->each(function (Crawler $node, $i) {
                     $urlArray = explode('/', $node->filter('a')->attr('href'));
-                    return '/' . $urlArray[1] . '/' . $urlArray[2] . '/' . $urlArray[3] . '/';
+                    // return '/' . $urlArray[1] . '/' . $urlArray[2] . '/' . $urlArray[3] . '/';
+                    return '/' . $urlArray[1] . '/' . $urlArray[2] . '/';
                 });
 
                 $productUrls = array_merge($productUrls, array_flip($urls));
@@ -95,14 +96,14 @@ if ($response->getStatusCode() == 200) {
             }
         }
 
-//        if ($key == 1) {
-//            $productUrls = (array_slice($productUrls, -1, 1));
-//            break;
-//        }
+       // if ($key == 1) {
+       //     $productUrls = (array_slice($productUrls, -1, 1));
+       //     break;
+       // }
     }
 //
-//    print_R($productUrls);
-//    exit;
+   // print_R(count($productUrls));
+   // exit;
 
     $directory = dirname(__FILE__).'/files/';
 //    $file = fopen($directory.'scraped'.$today->format('Ymd').'.csv', 'w');
@@ -110,9 +111,12 @@ if ($response->getStatusCode() == 200) {
 
     // go get product data from url
     foreach ($productUrls as $url => $someValue) {
-        $urlArray = explode('/', $url);
-        $response = $client->request('GET', $domain . $url);
 
+        $urlArray = explode('/', $url);
+        // print_r($url);
+        // print_r($urlArray);
+        // exit;
+        $response = $client->request('GET', $domain . $url);
 
         $crawler = new Crawler('' . $response->getBody());
 
@@ -154,5 +158,3 @@ if ($response->getStatusCode() == 200) {
 } else {
     echo 'Status Code: ' . $response->getStatusCode();
 }
-
-
