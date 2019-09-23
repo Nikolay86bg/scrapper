@@ -32,7 +32,7 @@ function generatePrice($categories, $oldPrice)
         case in_array('3D, 5D & 9D', $categories):
             return round((float) $oldPrice + ((float) $oldPrice * 1.1), 1);
         case in_array('Nаno Glass', $categories):
-            return round((float) $oldPrice + ((float) $oldPrice * 3), 1);
+            return round((float) $oldPrice + ((float) $oldPrice * 2), 1);
         case in_array('UV Glass', $categories):
             return round((float) $oldPrice + ((float) $oldPrice * 4), 1);
         case in_array('PREMIUM BRANDS', $categories):
@@ -96,14 +96,15 @@ if ($response->getStatusCode() == 200) {
             }
         }
 
-       // if ($key == 1) {
-       //     $productUrls = (array_slice($productUrls, -1, 1));
-       //     break;
-       // }
+        //For debugging
+//        if ($key == 3) {
+//            $productUrls = (array_slice($productUrls, -1, 1));
+//            break;
+//        }
     }
 //
-   // print_R(count($productUrls));
-   // exit;
+//    print_R($productUrls);
+//    exit;
 
     $directory = dirname(__FILE__).'/files/';
 //    $file = fopen($directory.'scraped'.$today->format('Ymd').'.csv', 'w');
@@ -111,15 +112,10 @@ if ($response->getStatusCode() == 200) {
 
     // go get product data from url
     foreach ($productUrls as $url => $someValue) {
-
         $urlArray = explode('/', $url);
-        // print_r($url);
-        // print_r($urlArray);
-        // exit;
         $response = $client->request('GET', $domain . $url);
 
         $crawler = new Crawler('' . $response->getBody());
-
 
         $id = $urlArray[2];
         $name = trim($crawler->filter('h3')->text());
@@ -128,12 +124,17 @@ if ($response->getStatusCode() == 200) {
 
         $description = trim($crawler->filter('.product-description')->text());
 
-        $image = $crawler->filter('.product-photo')->attr('src');
+//        $images = $crawler->filter('.product-photo')->attr('src');
+        $images = implode('|', $crawler->filter('#product-gallery .product-photo')->each(function (Crawler $node, $i) {
+            return trim($node->attr('src'));
+        }));
 
         if ($crawler->filter('.sold')->count() == 1) {
-            $inStock = $crawler->filter('.sold')->text();
+//            $inStock = $crawler->filter('.sold')->text();
+            $inStock = 0;
         } elseif ($crawler->filter('.sold-out')->count() == 1) {
-            $inStock = $crawler->filter('.sold-out')->text();
+//            $inStock = $crawler->filter('.sold-out')->text();
+            $inStock = 0;
         } else {
             $inStock = "";
         }
@@ -145,7 +146,7 @@ if ($response->getStatusCode() == 200) {
         // generate new price
         $newPrice = generatePrice($categories, $price);
 
-        fputcsv($file,[$id,$name,$newPrice,$description,$image,$inStock,implode(' | ',$categories)]);
+        fputcsv($file,[$id,$name,$newPrice,$description,$images,$inStock,implode(' | ',$categories)]);
     }
 
     fclose($file);
