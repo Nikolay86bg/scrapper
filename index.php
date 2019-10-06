@@ -102,7 +102,9 @@ if ($response->getStatusCode() == 200) {
 //            break;
 //        }
     }
-//
+
+    ///product/15438/
+//    $productUrls['/product/15438/'] = 23;
 //    print_R($productUrls);
 //    exit;
 
@@ -116,6 +118,15 @@ if ($response->getStatusCode() == 200) {
         $response = $client->request('GET', $domain . $url);
 
         $crawler = new Crawler('' . $response->getBody());
+
+        $categories = $crawler->filter('.breadcrumb > li')->each(function (Crawler $node, $i) {
+            return trim($node->filter('a')->text());
+        });
+
+        //DONT SAVE EMPTY OR BRANDS
+        if($categories[0] == '' || $categories[0] == 'Брандове'){
+            continue;
+        }
 
         $id = $urlArray[2];
         $name = trim($crawler->filter('h3')->text());
@@ -138,10 +149,6 @@ if ($response->getStatusCode() == 200) {
         } else {
             $inStock = "";
         }
-
-        $categories = $crawler->filter('.breadcrumb > li')->each(function (Crawler $node, $i) {
-            return trim($node->filter('a')->text());
-        });
 
         // generate new price
         $newPrice = generatePrice($categories, $price);
