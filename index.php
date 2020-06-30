@@ -57,10 +57,10 @@ function generatePrice($categories, $oldPrice)
 $today = new \DateTime();
 
 $loginArray = [
-    'email' => 'petarivanov2012@gmail.com',
-    'password' => '123456789',
+    'email' => '***@gmail.com',
+    'password' => '***',
 ];
-$domain = 'https://skyphone.bg';
+$domain = 'https://***.bg';
 $loginUrl = $domain . '/login';
 $client = new \GuzzleHttp\Client(['cookies' => true]);
 $response = $client->request('POST', $loginUrl, [
